@@ -1,0 +1,26 @@
+name: "Execute"
+
+description: Execute test
+
+outputs:
+  major:
+    description: The Major value
+    value: ${{ steps.gitversion.outputs.major }}
+  semVer:
+    description: The SemVer value
+    value: ${{ steps.gitversion.outputs.semVer }}
+
+runs:
+  using: composite
+  steps:
+    # Checkouts Repo
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    # Executing GitVersion
+    - name: Execute GitVersion
+      id: gitversion
+      uses: ./execute
+
+

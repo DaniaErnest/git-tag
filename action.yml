@@ -1,0 +1,137 @@
+
+name: "Git Version"
+
+description: Calculates the Semantic Version for the current branch
+
+outputs:
+  major: # id of output
+    description: 'The Major value'
+    value: ${{ steps.git-version.outputs.major }}
+  minor:
+    description: 'The Minor value'
+    value: ${{ steps.git-version.outputs.minor }}
+  patch:
+    description: 'The Patch value'
+    value: ${{ steps.git-version.outputs.patch }}
+  preReleaseTag:
+    description: 'The PreReleaseTag value'
+    value: ${{ steps.git-version.outputs.preReleaseTag }}
+  preReleaseTagWithDash:
+    description: 'The PreReleaseTagWithDash value'
+    value: ${{ steps.git-version.outputs.preReleaseTagWithDash }}
+  preReleaseLabel:
+    description: 'The PreReleaseLabel value'
+    value: ${{ steps.git-version.outputs.preReleaseLabel }}
+  preReleaseNumber:
+    description: 'The PreReleaseNumber value'
+    value: ${{ steps.git-version.outputs.preReleaseNumber }}
+  weightedPreReleaseNumber:
+    description: 'The WeightedPreReleaseNumber value'
+    value: ${{ steps.git-version.outputs.weightedPreReleaseNumber }}
+  buildMetaData:
+    description: 'The BuildMetaData value'
+    value: ${{ steps.git-version.outputs.buildMetaData }}
+  buildMetaDataPadded:
+    description: 'The BuildMetaDataPadded value'
+    value: ${{ steps.git-version.outputs.buildMetaDataPadded }}
+  fullBuildMetaData:
+    description: 'The FullBuildMetaData value'
+    value: ${{ steps.git-version.outputs.fullBuildMetaData }}
+  majorMinorPatch:
+    description: 'The MajorMinorPatch value'
+    value: ${{ steps.git-version.outputs.majorMinorPatch }}
+  semVer:
+    description: 'The SemVer value'
+    value: ${{ steps.git-version.outputs.semVer }}
+  legacySemVer:
+    description: 'The LegacySemVer value'
+    value: ${{ steps.git-version.outputs.legacySemVer }}
+  legacySemVerPadded:
+    description: 'The LegacySemVerPadded value'
+    value: ${{ steps.git-version.outputs.legacySemVerPadded }}
+  assemblySemVer:
+    description: 'The AssemblySemVer value'
+    value: ${{ steps.git-version.outputs.assemblySemVer }}
+  assemblySemFileVer:
+    description: 'The AssemblySemFileVer value'
+    value: ${{ steps.git-version.outputs.assemblySemFileVer }}
+  fullSemVer:
+    description: 'The FullSemVer value'
+    value: ${{ steps.git-version.outputs.fullSemVer }}
+  informationalVersion:
+    description: 'The InformationalVersion value'
+    value: ${{ steps.git-version.outputs.informationalVersion }}
+  branchName:
+    description: 'The BranchName value'
+    value: ${{ steps.git-version.outputs.branchName }}
+  escapedBranchName:
+    description: 'The EscapedBranchName value'
+    value: ${{ steps.git-version.outputs.escapedBranchName }}
+  sha:
+    description: 'The Sha value'
+    value: ${{ steps.git-version.outputs.sha }}
+  shortSha:
+    description: 'The ShortSha value'
+    value: ${{ steps.git-version.outputs.shortSha }}
+  nuGetVersionV2:
+    description: 'The NuGetVersionV2 value'
+    value: ${{ steps.git-version.outputs.nuGetVersionV2 }}
+  nuGetVersion:
+    description: 'The NuGetVersion value'
+    value: ${{ steps.git-version.outputs.nuGetVersion }}
+  nuGetPreReleaseTagV2:
+    description: 'The NuGetPreReleaseTagV2 value'
+    value: ${{ steps.git-version.outputs.nuGetPreReleaseTagV2 }}
+  nuGetPreReleaseTag:
+    description: 'The NuGetPreReleaseTag value'
+    value: ${{ steps.git-version.outputs.nuGetPreReleaseTag }}
+  versionSourceSha:
+    description: 'The VersionSourceSha value'
+    value: ${{ steps.git-version.outputs.versionSourceSha }}
+  commitsSinceVersionSource:
+    description: 'The CommitsSinceVersionSource value'
+    value: ${{ steps.git-version.outputs.commitsSinceVersionSource }}
+  commitsSinceVersionSourcePadded:
+    description: 'The CommitsSinceVersionSourcePadded value'
+    value: ${{ steps.git-version.outputs.commitsSinceVersionSourcePadded }}
+  uncommittedChanges:
+    description: 'The UncommittedChanges value'
+    value: ${{ steps.git-version.outputs.uncommittedChanges }}
+  commitDate:
+    description: 'The CommitDate value'
+    value: ${{ steps.git-version.outputs.commitDate }}
+
+runs:
+  using: composite
+  steps:
+    # Installing dotNet
+    - name: Install dotNet
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '3.1.x'
+
+    # Installing GitVersion
+    - name: Install GitVersion
+      uses: ./.github/actions/koji-gh-action-git-gitversion/setup
+      with:
+        versionSpec: '5.x'
+
+    # Adding GitVersion file if it doesn't exist
+    - name: Setting GitVersion file
+      shell: bash
+      run: |-
+        if [ ! -f ./GitVersion.yml ]; then
+          cp ./.github/actions/koji-gh-action-git-gitversion/res/GitVersion.yml ./GitVersion.yml
+        fi
+
+    # Debugging GitVersion file
+    - name: Debugging GitVersion file
+      shell: bash
+      run: cat ./GitVersion.yml
+
+    # Executing GitVersion
+    - name: Execute GitVersion
+      id: git-version
+      uses: ./.github/actions/koji-gh-action-git-gitversion/execute
+
+

@@ -1,0 +1,10 @@
+major-version-bump-message: '^?(BREAKING CHANGE|\+semver:\s?(breaking|major))'
+minor-version-bump-message: '^?(feat.*:\s|\+semver:\s?(feature|minor))'
+patch-version-bump-message: '^?(fix.*:\s|\+semver:\s?(fix|patch))'
+no-bump-message: '\+semver:\s?(none|skip)'
+increment: Inherit
+mode: Mainline
+branches: {}
+ignore:
+  sha: []
+merge-message-formats: {}

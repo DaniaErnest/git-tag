@@ -1,0 +1,26 @@
+name: "Setup"
+
+description: Setup test
+
+inputs:
+  versionSpec:
+    description: Required version in the form of 5.x or exact version like 5.0.0
+    required: true
+    default: ''
+
+
+runs:
+  using: composite
+  steps:
+    # Checkouts Repo
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    # Setup GitVersion
+    - name: Setup GitVersion
+      uses: ./setup
+      with:
+        versionSpec: '5.x'
+
+
