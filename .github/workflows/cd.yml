@@ -1,0 +1,139 @@
+name: "CD"
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  release-version:
+    name: CD
+    runs-on: ubuntu-20.04
+    steps:
+      # Checking out repo
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      # Running Gitversion
+      - name: GitVersion
+        id: gitversion
+        uses: ./
+
+      # Debugging
+      - run: |-
+          echo ${{ steps.git-version.outputs.semVer }}
+
+      # Creating Git SemVer and Updating Major
+      - name: Create Git Tag
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |-
+            let major_exists
+            let params = {
+              tag_semVer: `v${{ steps.gitversion.outputs.semVer }}`,
+              tag_major: `v${{ steps.gitversion.outputs.major }}`,
+              dry_run: false,
+              debug: true
+            }
+            params.debug ? console.log({ params: params }) : null
+            console.log("--")
+
+            try {
+              console.log("# ⭐ > Checking if Major tag exists")
+
+                response = await github.request(
+                  `GET /repos/${context.repo.owner}/${context.repo.repo}/git/ref/tags/${params.tag_major}`,
+                  {
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    ref: `refs/tags/${params.tag_major}`
+                  }
+                )
+                major_exists = true
+                console.log("# ⚙ > Major tag exists")
+                params.debug ? console.log({ status: response.status, data: response.data }) : null
+            }
+            catch(error){
+              major_exists = false
+              console.log("# ⚙ > Major tag does not exist")
+              params.debug ? console.log(error) : null
+            }
+
+
+            if(!major_exists) {
+              console.log("# ⭐ > Creating Major tag")
+
+              if(params.dry_run)
+              { console.log("# ⚙ > Dry Run") }
+              else{
+                try{
+                  response = await github.request(
+                    `POST /repos/${context.repo.owner}/${context.repo.repo}/git/refs`,
+                    {
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      ref: `refs/tags/${params.tag_major}`,
+                      sha: context.sha
+                    }
+                  )
+                  params.debug ? console.log({ status: response.status, data: response.data }) : null
+                  console.log("# ✅ > Major tag created")
+                }
+                catch(error) {
+                  params.debug ? console.log(error) : null
+                  core.setFailed("❌ Error Creating Major Tag");
+                  return
+                }
+              }
+            }
+            else {
+              console.log("# ⭐ > Updating Major tag")
+
+              if(params.dry_run)
+              { console.log("# ⚙ > Dry Run") }
+              else{
+                try{
+                  response = await github.request(
+                    `PATCH /repos/${context.repo.owner}/${context.repo.repo}/git/refs/tags/${params.tag_major}`,
+                    {
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      ref: `refs/tags/${params.tag_major}`,
+                      sha: context.sha
+                    }
+                  )
+                  params.debug ? console.log({ status: response.status, data: response.data }) : null
+                  console.log("# ✅ > Major tag updated")
+                }
+                catch(error) {
+                  params.debug ? console.log(error) : null
+                  core.setFailed("❌ Error Updating Major Tag");
+                  return
+                }
+              }
+            }
+
+            console.log("# ⭐ > Creating SemVer tag")
+            if(params.dry_run)
+            { console.log("# ⚙ > Dry Run") }
+            else{
+              try{
+                  response = await github.request(
+                    `POST /repos/${context.repo.owner}/${context.repo.repo}/git/refs`,
+                    {
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      ref: `refs/tags/${params.tag_semVer}`,
+                      sha: context.sha
+                    }
+                )
+                params.debug ? console.log({ status: response.status, data: response.data }) : null
+                console.log("# ✅ > SemVer tag created")
+              }
+              catch(error) {
+                console.log(error)
+                core.setFailed("❌ Error Creating SemVer");
+              }
+            }

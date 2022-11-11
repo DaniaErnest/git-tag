@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: feat**
+
+jobs:
+  ci:
+    name: CI
+    environment: test
+    runs-on: ubuntu-latest
+    steps:
+
+    # Checking out project
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    # Validating repo checksum against secret
+    # More about this on README.md, at the bottom
+    - name: Validate Checksums
+      shell: bash
+      run: |-
+
+        if [[ "$(shasum -a 256 ./setup/bundle.js | awk '{print $1}')" !=  "${{ secrets.SETUP_SHA256 }}"  ]]; then
+          echo "Setup: Invalid SHA256"
+          exit 1
+        fi
+
+        if [[ "$(shasum -a 256 ./execute/bundle.js | awk '{print $1}')" !=  "${{ secrets.EXECUTE_SHA256 }}" ]]; then
+          echo "Execute: Invalid SHA256"
+          exit 1
+        fi
+
+    # Testing action
+    - name: Test Action
+      id: test-action
+      uses: ./
+
+    # Debugging action
+    - name: Debugging
+      shell: bash
+      run: |-
+        echo ${{ steps.test-action.outputs.semVer }}
+
+
