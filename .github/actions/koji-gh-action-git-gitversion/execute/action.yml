@@ -22,5 +22,3 @@ runs:
     - name: Execute GitVersion
       id: gitversion
       uses: ./execute
-
-
