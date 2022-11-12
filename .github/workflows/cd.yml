@@ -13,7 +13,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GIT_TOKEN}}
           fetch-depth: 0
 
       # Running Gitversion
