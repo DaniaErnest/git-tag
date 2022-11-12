@@ -15,6 +15,12 @@ jobs:
         with:
           fetch-depth: 0
           
+      - name: List Files After Checkout
+        run: |
+          pwd
+          ls -la
+          ls -a
+          
       - name: remote
         run: |
          git remote -v
